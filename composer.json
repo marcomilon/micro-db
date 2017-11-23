@@ -1,0 +1,24 @@
+{
+  "name": "fullstackpe/micro-db",
+  "description": "Simple orm library",
+  "license": "MIT",
+  "keywords": ["orm"],
+  "authors": [
+    {
+      "name": "Marco Milon",
+      "email": "marco.milon@gmail.com",
+      "homepage": "https://github.com/marcomilon"      
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0"
+  },
+  "require-dev": {
+    "atoum/atoum": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "micro\\": "src"
+    }
+  }
+}
