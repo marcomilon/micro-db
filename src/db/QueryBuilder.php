@@ -5,6 +5,7 @@ namespace micro\db;
 class QueryBuilder
 {
     private $table;
+    private $query;
     
     public function __construct($table)
     {
@@ -14,28 +15,27 @@ class QueryBuilder
         $this->table = $table;    
     }
     
-    public function select($columns = [], $conditions = [], $options = []) 
+    public function select($columns = '*') 
     {
-        $query = 'SELECT';
+        $this->query = 'SELECT';
         
-        if(!empty($columns)) {
+        if(is_array($columns)) {
             foreach($columns as $column) {
-                $query .= ' `' . $column . '`,';
+                $this->query .= ' `' . $column . '`,';
             }
             
-            $query = trim($query, ',') . ' ';
+            $this->query = trim($query, ',') . ' ';
         } else {
-            $query .= ' * ';
+            $this->query .= ' * ';
         }
         
-        $query .= 'FROM `' . $this->table . '`';
-        
-        if(!empty($conditions)) {
-            $query .= ' WHERE ' . $this->buildCondition($conditions);
-        }
-        
-        return $query;
+        return $this;
     }
+    
+    public function query() {
+        return $this->query;
+    }
+    
     
     private function buildCondition($conditions) {
         
