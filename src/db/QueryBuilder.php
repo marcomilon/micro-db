@@ -6,14 +6,11 @@ class QueryBuilder
 {
     
     private $sql;
-    private $table;
     
-    public function __construct($table)
+    public function __construct()
     {
         set_error_handler([$this, 'handleError']);
-        error_reporting(E_ALL | E_STRICT);   
-        
-        $this->table = $table;
+        error_reporting(E_ALL | E_STRICT);
     }
     
     public function select($columns = '*') 
@@ -30,7 +27,11 @@ class QueryBuilder
             $this->sql .= ' * ';
         }
         
-        $this->sql .= 'FROM `' . $this->table . '`';
+        return $this;
+    }
+    
+    public function from($table) {
+        $this->sql .= 'FROM `' . $table . '`';
         
         return $this;
     }
