@@ -35,18 +35,64 @@ class QueryBuilder
         return $this;
     }
     
-    public function where($condition) {
+    public function where($condition) 
+    {
         $this->sql .= ' WHERE ' . $this->buildCondition($condition);
         
         return $this;
     }
     
-    public function getSql() {
+    public function orderBy($order) 
+    {
+        
+        $this->sql .= ' ORDER BY ';
+        
+        foreach($order as $column) {
+            $this->sql .= '`' . $column[0] . '` ' . $column[1]. ', ';
+        }
+        
+        $this->sql = trim($this->sql, ', ');
+        
+        return $this;
+    }
+    
+    public function groupBy($group) 
+    {
+        
+        $this->sql .= ' GROUP BY ';
+        
+        if(is_array($group)) {
+            foreach($group as $column) {
+                $this->sql .= '`' . $column . '`, ';
+            }
+            
+            $this->sql = trim($this->sql, ', ');
+        } else {
+            $this->sql .= '`' . $group . '`';
+        }
+        
+        return $this;
+    }
+    
+    public function limit($from, $to = '') 
+    {
+        $this->sql .= ' LIMIT ' . $from;
+        
+        if(is_numeric($to)) {
+            $this->sql .= ', ' . $to;
+        }
+        
+        return $this;
+    }
+    
+    public function getSql() 
+    {
         return $this->sql;
     }
     
     
-    private function buildCondition($condition) {
+    private function buildCondition($condition) 
+    {
         
         $where = '';
         
