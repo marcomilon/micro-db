@@ -4,50 +4,59 @@ namespace micro\db;
 
 class QueryBuilder
 {
+    
+    private $sql;
     private $table;
-    private $query;
     
     public function __construct($table)
     {
         set_error_handler([$this, 'handleError']);
-        error_reporting(E_ALL | E_STRICT);
+        error_reporting(E_ALL | E_STRICT);   
         
-        $this->table = $table;    
+        $this->table = $table;
     }
     
     public function select($columns = '*') 
     {
-        $this->query = 'SELECT';
+        $this->sql = 'SELECT';
         
         if(is_array($columns)) {
             foreach($columns as $column) {
-                $this->query .= ' `' . $column . '`,';
+                $this->sql .= ' `' . $column . '`,';
             }
             
-            $this->query = trim($query, ',') . ' ';
+            $this->sql = trim($this->sql, ',') . ' ';
         } else {
-            $this->query .= ' * ';
+            $this->sql .= ' * ';
         }
+        
+        $this->sql .= 'FROM `' . $this->table . '`';
         
         return $this;
     }
     
-    public function query() {
-        return $this->query;
+    public function where($condition) {
+        $this->sql .= ' WHERE ' . $this->buildCondition($condition);
+        
+        return $this;
+    }
+    
+    public function getSql() {
+        return $this->sql;
     }
     
     
-    private function buildCondition($conditions) {
+    private function buildCondition($condition) {
         
         $where = '';
         
-        foreach($conditions as $condition) {
-            if(count($condition) == 3) {
-                $where .= '`' . $condition[0] . '` ' . $condition[1] . ' \'' . $condition[2] . '\'';
+        foreach($condition as $filter) {
+            if(count($filter) == 3) {
+                $where .= '`' . $filter[0] . '` ' . $filter[1] . ' \'' . $filter[2] . '\'';
             }
             
-            if(count($condition) == 1) {
-                $where .= ' ' . strtoupper($condition[0]) . ' ';
+            if(count($filter) == 1) {
+                $where .= ' ' . strtoupper($filter[0]) . ' ';
             }
         }
         
