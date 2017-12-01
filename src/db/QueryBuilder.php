@@ -4,11 +4,12 @@ namespace micro\db;
 
 class QueryBuilder
 {
-    
+
+    private $db;    
     private $sql;
     
     public function __construct()
-    {
+    {    
         set_error_handler([$this, 'handleError']);
         error_reporting(E_ALL | E_STRICT);
     }
@@ -108,6 +109,22 @@ class QueryBuilder
         }
         
         return $where;
+    }
+    
+    public function quoteValue($value) {
+        return $this->conn->quote($value);
+    }
+    
+    public function quoteTableName($table) {
+        return $this->quoteBacktick($table);
+    }
+    
+    public function quoteColumnName($column) {
+        return $this->quoteBacktick($column);
+    }
+    
+    private function quoteBacktick($value) {
+        return '`' . $value . '`';
     }
     
     public function handleError($errno, $errstr, $errfile, $errline)

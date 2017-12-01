@@ -187,4 +187,15 @@ class QueryBuilder extends atoum
         $this->string($sql)->isEqualTo($expectedSql);        
     }
     
+    
+    public function testSelectSqlInjection() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['id', '=', "Bobby';DROP TABLE users; -- "]
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- '");
+    }
+    
 }
