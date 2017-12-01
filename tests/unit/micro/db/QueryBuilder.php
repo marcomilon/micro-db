@@ -10,14 +10,14 @@ class QueryBuilder extends atoum
     public function testSelect() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
-        $sql = $qB->select()->from($table)->getSql();
+        $sql = $qB->select()->from($table)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table`");
     }
     
     public function testSelectAllColumns() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
-        $sql = $qB->select('*')->from($table)->getSql();
+        $sql = $qB->select('*')->from($table)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table`");
     }
     
@@ -29,7 +29,7 @@ class QueryBuilder extends atoum
             'name',
             'address'
         ];
-        $sql = $qB->select($columns)->from($table)->getSql();
+        $sql = $qB->select($columns)->from($table)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT `id`, `name`, `address` FROM `$table`");
     }
     
@@ -41,8 +41,32 @@ class QueryBuilder extends atoum
             ['and'],
             ['status', '!=', '0']
         ];
-        $sql = $qB->select()->from($table)->where($condition)->getSql();
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0'");
+    }
+    
+    public function testSelectWithMixedConditions() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['id', '=', '1'],
+            ['and'],
+            ['status', '!=', '0'],
+            ['or'],
+            ['age', '>=', '18']
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0' OR `age` >= '18'");
+    }
+    
+    public function testSelectBetween() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['between', '10', '100']
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0' OR `age` >= '18'");
     }
     
     public function testSelectWithColumnsAndConditions() {
@@ -58,14 +82,14 @@ class QueryBuilder extends atoum
             ['and'],
             ['status', '!=', '0']
         ];
-        $sql = $qB->select($columns)->from($table)->where($condition)->getSql();
+        $sql = $qB->select($columns)->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = '1' AND `status` != '0'");
     }
     
     public function testSelectGroupBy() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
-        $sql = $qB->select()->from($table)->groupBy('status')->getSql();
+        $sql = $qB->select()->from($table)->groupBy('status')->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` GROUP BY `status`");
     }
     
@@ -77,7 +101,7 @@ class QueryBuilder extends atoum
             'name',
             'address'
         ];
-        $sql = $qB->select()->from($table)->groupBy($group)->getSql();
+        $sql = $qB->select()->from($table)->groupBy($group)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` GROUP BY `id`, `name`, `address`");
     }
     
@@ -87,7 +111,7 @@ class QueryBuilder extends atoum
         $orderBy = [
             ['id', 'ASC']
         ];        
-        $sql = $qB->select()->from($table)->orderBy($orderBy)->getSql();
+        $sql = $qB->select()->from($table)->orderBy($orderBy)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` ORDER BY `id` ASC");
     }
     
@@ -98,21 +122,21 @@ class QueryBuilder extends atoum
             ['id', 'ASC'],
             ['status', 'DESC']
         ];        
-        $sql = $qB->select()->from($table)->orderBy($orderBy)->getSql();
+        $sql = $qB->select()->from($table)->orderBy($orderBy)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` ORDER BY `id` ASC, `status` DESC");
     }
     
     public function testSelectLimit() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
-        $sql = $qB->select()->from($table)->limit('10')->getSql();
+        $sql = $qB->select()->from($table)->limit('10')->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` LIMIT 10");
     }
     
     public function testSelectLimitFromTO() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
-        $sql = $qB->select()->from($table)->limit('10', '100')->getSql();
+        $sql = $qB->select()->from($table)->limit('10', '100')->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` LIMIT 10, 100");
     }
     
@@ -127,17 +151,17 @@ class QueryBuilder extends atoum
             ['and'],
             ['status', '!=', '0']
         ];
-        
+    
         $group = [
             'id',
             'name',
             'address'
         ];
-        
+    
         $orderBy = [
             ['id', 'ASC']
         ]; 
-        
+    
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -146,7 +170,7 @@ class QueryBuilder extends atoum
         ->groupBy($group)
         ->orderBy($orderBy)
         ->limit(10, 100)
-        ->getSql();
+        ->getRawSql();
         $expectedSql = "SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = '1' AND `status` != '0' GROUP BY `id`, `name`, `address` ORDER BY `id` ASC LIMIT 10, 100";
         $this->string($sql)->isEqualTo($expectedSql);        
     }
@@ -162,18 +186,18 @@ class QueryBuilder extends atoum
             ['and'],
             ['status', '!=', '0']
         ];
-        
+    
         $group = [
             'id',
             'name',
             'address'
         ];
-        
+    
         $orderBy = [
             ['id', 'ASC'],
             ['status', 'DESC']
         ]; 
-        
+    
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -182,20 +206,22 @@ class QueryBuilder extends atoum
         ->groupBy($group)
         ->orderBy($orderBy)
         ->limit(10, 100)
-        ->getSql();
+        ->getRawSql();
         $expectedSql = "SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = '1' AND `status` != '0' GROUP BY `id`, `name`, `address` ORDER BY `id` ASC, `status` DESC LIMIT 10, 100";
         $this->string($sql)->isEqualTo($expectedSql);        
     }
     
     
-    public function testSelectSqlInjection() {
+    public function testSelectEscapeValues() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $condition = [
-            ['id', '=', "Bobby';DROP TABLE users; -- "]
+            ['id', '=', "Bobby';DROP TABLE users; -- "],
+            ['and'],
+            ['status', '=', '" or ""="']
         ];
-        $sql = $qB->select()->from($table)->where($condition)->getSql();
-        $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- '");
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- ' AND `status` = '\\\" or \\\"\\\"=\\\"'");
     }
     
 }

@@ -8,6 +8,12 @@ class QueryBuilder
     private $db;    
     private $sql;
     
+    private $logicalOperators = [
+        'AND',
+        'OR',
+        'XOR'
+    ];
+    
     public function __construct()
     {    
         set_error_handler([$this, 'handleError']);
@@ -16,23 +22,23 @@ class QueryBuilder
     
     public function select($columns = '*') 
     {
-        $this->sql = 'SELECT';
+        $this->sql = 'SELECT ';
         
         if(is_array($columns)) {
             foreach($columns as $column) {
-                $this->sql .= ' `' . $column . '`,';
+                $this->sql .= $this->quoteColumnName($column) . ', ';
             }
             
-            $this->sql = trim($this->sql, ',') . ' ';
+            $this->sql = trim($this->sql, ', ') . ' ';
         } else {
-            $this->sql .= ' * ';
+            $this->sql .= '* ';
         }
         
         return $this;
     }
     
     public function from($table) {
-        $this->sql .= 'FROM `' . $table . '`';
+        $this->sql .= 'FROM ' . $this->quoteTableName($table);
         
         return $this;
     }
@@ -50,7 +56,7 @@ class QueryBuilder
         $this->sql .= ' ORDER BY ';
         
         foreach($order as $column) {
-            $this->sql .= '`' . $column[0] . '` ' . $column[1]. ', ';
+            $this->sql .= $this->quoteColumnName($column[0]) .' '. $column[1] . ', ';
         }
         
         $this->sql = trim($this->sql, ', ');
@@ -65,12 +71,12 @@ class QueryBuilder
         
         if(is_array($group)) {
             foreach($group as $column) {
-                $this->sql .= '`' . $column . '`, ';
+                $this->sql .= $this->quoteColumnName($column) . ', ';
             }
             
             $this->sql = trim($this->sql, ', ');
         } else {
-            $this->sql .= '`' . $group . '`';
+            $this->sql .= $this->quoteColumnName($group);
         }
         
         return $this;
@@ -87,7 +93,7 @@ class QueryBuilder
         return $this;
     }
     
-    public function getSql() 
+    public function getRawSql() 
     {
         return $this->sql;
     }
@@ -99,12 +105,13 @@ class QueryBuilder
         $where = '';
         
         foreach($condition as $filter) {
-            if(count($filter) == 3) {
-                $where .= '`' . $filter[0] . '` ' . $filter[1] . ' \'' . $filter[2] . '\'';
-            }
-            
-            if(count($filter) == 1) {
-                $where .= ' ' . strtoupper($filter[0]) . ' ';
+            switch(count($filter)) {
+                case 1:
+                    $where .= ' ' . $this->validateLogicalOperator(($filter[0])) . ' ';
+                break;
+                case 3:
+                    $where .= $this->quoteColumnName($filter[0]) .' '. $filter[1] .' '. $this->quoteValue($filter[2]);
+                break;
             }
         }
         
@@ -112,7 +119,7 @@ class QueryBuilder
     }
     
     public function quoteValue($value) {
-        return $this->conn->quote($value);
+        return '\'' . addslashes($value) . '\'';
     }
     
     public function quoteTableName($table) {
@@ -124,7 +131,17 @@ class QueryBuilder
     }
     
     private function quoteBacktick($value) {
-        return '`' . $value . '`';
+        return '`' . str_replace('`', '``' ,$value) . '`';
+    }
+    
+    private function validateLogicalOperator($value) {
+        $operator = strtoupper($value);
+        $isValid = in_array($operator, $this->logicalOperators);
+        
+        if($isValid === true) {
+            return $operator;
+        } 
+        
     }
     
     public function handleError($errno, $errstr, $errfile, $errline)
