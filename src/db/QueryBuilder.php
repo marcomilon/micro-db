@@ -14,6 +14,15 @@ class QueryBuilder
         'XOR'
     ];
     
+    private $comparisonOperators  = [
+        '=',
+        '>',
+        '>=',
+        '<',
+        '<=',
+        '!='   
+    ];
+    
     public function __construct()
     {    
         set_error_handler([$this, 'handleError']);
@@ -110,7 +119,10 @@ class QueryBuilder
                     $where .= ' ' . $this->validateLogicalOperator(($filter[0])) . ' ';
                 break;
                 case 3:
-                    $where .= $this->quoteColumnName($filter[0]) .' '. $filter[1] .' '. $this->quoteValue($filter[2]);
+                    $where .= $this->quoteColumnName($filter[0]) .' '. $this->validateComparisonOperators($filter[1]) .' '. $this->quoteValue($filter[2]);
+                break;
+                case 4:
+                    $where .= $this->quoteColumnName($filter[1]) .' '. $filter[0] .' '. $this->quoteValue($filter[2]) . ' AND ' . $this->quoteValue($filter[3]);
                 break;
             }
         }
@@ -137,6 +149,16 @@ class QueryBuilder
     private function validateLogicalOperator($value) {
         $operator = strtoupper($value);
         $isValid = in_array($operator, $this->logicalOperators);
+        
+        if($isValid === true) {
+            return $operator;
+        } 
+        
+    }
+    
+    private function validateComparisonOperators($value) {
+        $operator = strtoupper($value);
+        $isValid = in_array($operator, $this->comparisonOperators);
         
         if($isValid === true) {
             return $operator;

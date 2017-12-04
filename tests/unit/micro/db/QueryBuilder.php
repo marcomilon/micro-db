@@ -63,10 +63,10 @@ class QueryBuilder extends atoum
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $condition = [
-            ['between', '10', '100']
+            ['between', 'age', '18', '50']
         ];
         $sql = $qB->select()->from($table)->where($condition)->getRawSql();
-        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0' OR `age` >= '18'");
+        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `age` BETWEEN '18' AND '50'");
     }
     
     public function testSelectWithColumnsAndConditions() {
