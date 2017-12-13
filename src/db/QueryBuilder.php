@@ -20,7 +20,9 @@ class QueryBuilder
         '>=',
         '<',
         '<=',
-        '!='   
+        '!=',
+        'BETWEEN',
+        'IN'
     ];
     
     public function __construct()
@@ -119,10 +121,10 @@ class QueryBuilder
                     $where .= ' ' . $this->validateLogicalOperator(($filter[0])) . ' ';
                 break;
                 case 3:
-                    $where .= $this->quoteColumnName($filter[0]) .' '. $this->validateComparisonOperators($filter[1]) .' '. $this->quoteValue($filter[2]);
+                    $where .= $this->quoteColumnName($filter[1]) .' '. $this->validateComparisonOperators($filter[0]) .' '. $this->handleThridParameter($filter[2]);
                 break;
                 case 4:
-                    $where .= $this->quoteColumnName($filter[1]) .' '. $filter[0] .' '. $this->quoteValue($filter[2]) . ' AND ' . $this->quoteValue($filter[3]);
+                    $where .= $this->quoteColumnName($filter[1]) .' '. $this->validateComparisonOperators($filter[0]) .' '. $this->quoteValue($filter[2]) . ' AND ' . $this->quoteValue($filter[3]);
                 break;
             }
         }
@@ -130,24 +132,45 @@ class QueryBuilder
         return $where;
     }
     
-    public function quoteValue($value) {
+    public function quoteValue($value) 
+    {
         return '\'' . addslashes($value) . '\'';
     }
     
-    public function quoteTableName($table) {
+    public function quoteTableName($table) 
+    {
         return $this->quoteBacktick($table);
     }
     
-    public function quoteColumnName($column) {
+    public function quoteColumnName($column) 
+    {
         return $this->quoteBacktick($column);
     }
     
-    private function quoteBacktick($value) {
+    private function quoteBacktick($value) 
+    {
         return '`' . str_replace('`', '``' ,$value) . '`';
     }
     
-    private function validateLogicalOperator($value) {
-        $operator = strtoupper($value);
+    private function handleThridParameter($param) 
+    {
+        $result = '';
+        if(is_array($param)) {
+            $result = '(';
+            foreach($param as $v) {
+                $result .= $this->quoteValue($v) . ', ';
+            }
+            $result = trim($result, ', ') . ')';
+        } else {
+            $result = $this->quoteValue($param);
+        }
+        
+        return $result;
+    }
+    
+    private function validateLogicalOperator($value) 
+    {
+        $operator = strtoupper(trim($value));
         $isValid = in_array($operator, $this->logicalOperators);
         
         if($isValid === true) {
@@ -156,16 +179,16 @@ class QueryBuilder
         
     }
     
-    private function validateComparisonOperators($value) {
-        $operator = strtoupper($value);
+    private function validateComparisonOperators($operator) 
+    {
+        $operator = strtoupper(trim($operator));
         $isValid = in_array($operator, $this->comparisonOperators);
         
         if($isValid === true) {
             return $operator;
         } 
-        
     }
-    
+        
     public function handleError($errno, $errstr, $errfile, $errline)
     {
         if (!(error_reporting() & $errno)) {

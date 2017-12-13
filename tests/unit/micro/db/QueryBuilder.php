@@ -37,9 +37,9 @@ class QueryBuilder extends atoum
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $condition = [
-            ['id', '=', '1'],
+            ['=', 'id', '1'],
             ['and'],
-            ['status', '!=', '0']
+            ['!=', 'status', '0']
         ];
         $sql = $qB->select()->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0'");
@@ -49,24 +49,14 @@ class QueryBuilder extends atoum
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $condition = [
-            ['id', '=', '1'],
+            ['=', 'id', '1'],
             ['and'],
-            ['status', '!=', '0'],
+            ['!=', 'status', '0'],
             ['or'],
-            ['age', '>=', '18']
+            ['>=', 'age', '18']
         ];
         $sql = $qB->select()->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `id` = '1' AND `status` != '0' OR `age` >= '18'");
-    }
-    
-    public function testSelectBetween() {
-        $table = 'home';
-        $qB = new \micro\db\QueryBuilder();
-        $condition = [
-            ['between', 'age', '18', '50']
-        ];
-        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
-        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `age` BETWEEN '18' AND '50'");
     }
     
     public function testSelectWithColumnsAndConditions() {
@@ -78,9 +68,9 @@ class QueryBuilder extends atoum
             'address'
         ];
         $condition = [
-            ['id', '=', '1'],
+            ['=', 'id', '1'],
             ['and'],
-            ['status', '!=', '0']
+            ['!=', 'status', '0']
         ];
         $sql = $qB->select($columns)->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = '1' AND `status` != '0'");
@@ -147,21 +137,21 @@ class QueryBuilder extends atoum
             'address'
         ];
         $condition = [
-            ['id', '=', '1'],
+            ['=', 'id', '1'],
             ['and'],
-            ['status', '!=', '0']
+            ['!=', 'status', '0']
         ];
-    
+        
         $group = [
             'id',
             'name',
             'address'
         ];
-    
+        
         $orderBy = [
             ['id', 'ASC']
         ]; 
-    
+        
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -182,22 +172,22 @@ class QueryBuilder extends atoum
             'address'
         ];
         $condition = [
-            ['id', '=', '1'],
+            ['=', 'id', '1'],
             ['and'],
-            ['status', '!=', '0']
+            ['!=', 'status', '0']
         ];
-    
+        
         $group = [
             'id',
             'name',
             'address'
         ];
-    
+        
         $orderBy = [
             ['id', 'ASC'],
             ['status', 'DESC']
         ]; 
-    
+        
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -216,12 +206,32 @@ class QueryBuilder extends atoum
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $condition = [
-            ['id', '=', "Bobby';DROP TABLE users; -- "],
+            ['=', 'id', "Bobby';DROP TABLE users; -- "],
             ['and'],
-            ['status', '=', '" or ""="']
+            ['=', 'status', '" or ""="']
         ];
         $sql = $qB->select()->from($table)->where($condition)->getRawSql();
         $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- ' AND `status` = '\\\" or \\\"\\\"=\\\"'");
+    }
+    
+    public function testSelectBetween() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['between', 'age', '18', '50']
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `age` BETWEEN '18' AND '50'");
+    }
+    
+    public function testSelectIn() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['in', 'lastname', ['test1', 'test2', 'test3']]
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `lastname` IN ('test1', 'test2', 'test3')");
     }
     
 }
