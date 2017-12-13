@@ -25,10 +25,12 @@ class QueryBuilder
         'IN'
     ];
     
-    public function __construct()
+    public function __construct($db = null)
     {    
         set_error_handler([$this, 'handleError']);
         error_reporting(E_ALL | E_STRICT);
+        
+        $this->db = $db;
     }
     
     public function select($columns = '*') 

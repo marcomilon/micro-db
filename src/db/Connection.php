@@ -13,27 +13,4 @@ class Connection
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     
-    public function quoteValue($value) {
-        return $this->conn->quote($value);
-    }
-    
-    public function quoteTableName($table) {
-        return $this->quoteBacktick($table);
-    }
-    
-    public function quoteColumnName($column) {
-        return $this->quoteBacktick($column);
-    }
-    
-    public function execute() {
-        
-    }
-    
-    public function query() {
-        
-    }
-    
-    private function quoteBacktick($value) {
-        return '`' . $value . '`';
-    }
 }
