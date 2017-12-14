@@ -50,7 +50,8 @@ class QueryBuilder
         return $this;
     }
     
-    public function from($table) {
+    public function from($table) 
+    {    
         $this->sql .= 'FROM ' . $this->quoteTableName($table);
         
         return $this;
@@ -114,7 +115,6 @@ class QueryBuilder
     
     private function buildCondition($condition) 
     {
-        
         $where = '';
         
         foreach($condition as $filter) {
@@ -179,16 +179,19 @@ class QueryBuilder
             return $operator;
         } 
         
+        throw new \Exception("Logical operator $value is not supported.");
     }
     
-    private function validateComparisonOperators($operator) 
+    private function validateComparisonOperators($value) 
     {
-        $operator = strtoupper(trim($operator));
+        $operator = strtoupper(trim($value));
         $isValid = in_array($operator, $this->comparisonOperators);
         
         if($isValid === true) {
             return $operator;
         } 
+        
+        throw new \Exception("Comparison operator $value is not supported.");
     }
         
     public function handleError($errno, $errstr, $errfile, $errline)

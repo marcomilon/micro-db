@@ -171,6 +171,7 @@ class QueryBuilder extends atoum
             'name',
             'address'
         ];
+        
         $condition = [
             ['=', 'id', '1'],
             ['and'],
@@ -234,4 +235,36 @@ class QueryBuilder extends atoum
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `lastname` IN ('test1', 'test2', 'test3')");
     }
     
+    public function testSelectLogicalOperatorNotSupported() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $this->exception(
+            function() use($qB) {
+                $table = 'home';
+                $condition = [
+                    ['=', 'id', '1'],
+                    ['ands'],
+                    ['!=', 'status', '0']
+                ];
+                $qB->select()->from($table)->where($condition)->getRawSql();
+            }
+        )->hasMessage('Logical operator ands is not supported.');
+    }
+    
+    public function testSelectComparisonOperatorNotSupported() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $this->exception(
+            function() use($qB) {
+                $table = 'home';
+                $condition = [
+                    ['=!', 'id', '1'],
+                    ['ands'],
+                    ['=', 'status', '0']
+                ];
+                $qB->select()->from($table)->where($condition)->getRawSql();
+            }
+        )->hasMessage('Comparison operator =! is not supported.');
+    }
+
 }
