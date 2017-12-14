@@ -114,12 +114,12 @@ class QueryBuilder
     
     public function one() {
         $result = $this->db->conn->query($this->sql);
-        return $result->fetch(PDO::FETCH_ASSOC);
+        return $result->fetch(\PDO::FETCH_ASSOC);
     }
     
     public function all() {
         $result = $this->db->conn->query($this->sql);
-        return $result->fetchAll(PDO::FETCH_ASSOC);
+        return $result->fetchAll(\PDO::FETCH_ASSOC);
     }
     
     private function buildCondition($condition) 
