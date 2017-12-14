@@ -5,7 +5,7 @@ namespace micro\db;
 class Connection
 {
     
-    private $conn;
+    public $conn;
     
     public function __construct($servername, $username, $password, $database) 
     {
