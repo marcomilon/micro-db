@@ -107,6 +107,42 @@ class QueryBuilder
         return $this;
     }
     
+    public function insert($table, $columns) 
+    {
+        $this->sql = 'INSERT INTO ' . $this->quoteTableName($table) . ' ';
+
+        $columnNames = '(';
+        $columnValues = '(';
+        foreach($columns as $k => $v) {
+            $columnNames .= $this->quoteColumnName($k) . ', ';
+            $columnValues .= $this->quoteValue($v) . ', ';
+        }
+        
+        $this->sql .= trim($columnNames, ', ') . ')';
+        $this->sql .= ' VALUES ';
+        $this->sql .= trim($columnValues, ', ') . ')';
+        
+        return $this;        
+    }
+    
+    public function update($table, $columns) 
+    {
+        $this->sql = 'UPDATE ' . $this->quoteTableName($table) . ' SET ';
+        foreach($columns as $k => $v) {
+            $this->sql .= $this->quoteColumnName($k) .' = '. $this->quoteValue($v) . ', ';
+        }
+        
+        $this->sql = trim($this->sql, ', ');
+        
+        return $this;
+    }
+    
+    public function delete($table) {
+        $this->sql = 'DELETE FROM ' . $this->quoteTableName($table);
+        
+        return $this;
+    }
+    
     public function getRawSql() 
     {
         return $this->sql;

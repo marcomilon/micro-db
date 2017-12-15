@@ -235,6 +235,60 @@ class QueryBuilder extends atoum
         $this->string($sql)->isEqualTo("SELECT * FROM `$table` WHERE `lastname` IN ('test1', 'test2', 'test3')");
     }
     
+    
+    public function testInsert() {
+        $table = 'admin';
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->insert($table, [
+            'name' => 'Marco',
+            'lastname' => 'Milon',
+            'email' => 'marco.milon@gmail.com'
+        ])->getRawSql();
+        $this->string($sql)->isEqualTo("INSERT INTO `admin` (`name`, `lastname`, `email`) VALUES ('Marco', 'Milon', 'marco.milon@gmail.com')");
+    }
+    
+    public function testUpdate() {
+        $table = 'admin';
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->update($table, [
+            'name' => 'Valentin',
+            'lastname' => 'Milon Juarez'
+        ])->getRawSql();
+        $this->string($sql)->isEqualTo("UPDATE `admin` SET `name` = 'Valentin', `lastname` = 'Milon Juarez'");
+    }
+    
+    public function testUpdateWitdhCondition() {
+        $table = 'admin';
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->update($table, [
+            'name' => 'Valentin',
+            'lastname' => 'Milon Juarez'
+        ])->where([
+            ['=', 'id', '1']
+        ])
+        ->getRawSql();
+        $this->string($sql)->isEqualTo("UPDATE `admin` SET `name` = 'Valentin', `lastname` = 'Milon Juarez' WHERE `id` = '1'");
+    }
+    
+    
+    public function testDelete() {
+        $table = 'admin';
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->delete($table)->getRawSql();
+        $this->string($sql)->isEqualTo("DELETE FROM `admin`");
+    }
+    
+    public function testDeleteWithConditions() {
+        $table = 'admin';
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->delete($table)
+        ->where([
+            ['=', 'id', '1']
+        ])
+        ->getRawSql();
+        $this->string($sql)->isEqualTo("DELETE FROM `admin` WHERE `id` = '1'");
+    }
+    
     public function testSelectLogicalOperatorNotSupported() {
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
@@ -266,5 +320,5 @@ class QueryBuilder extends atoum
             }
         )->hasMessage('Comparison operator =! is not supported.');
     }
-
+    
 }
