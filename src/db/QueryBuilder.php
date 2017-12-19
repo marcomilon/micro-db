@@ -4,9 +4,9 @@ namespace micro\db;
 
 class QueryBuilder
 {
-
-    private $db;    
+  
     private $sql;
+    private $condition;
     
     private $logicalOperators = [
         'AND',
@@ -25,12 +25,10 @@ class QueryBuilder
         'IN'
     ];
     
-    public function __construct($db = null)
+    public function __construct()
     {    
         set_error_handler([$this, 'handleError']);
-        error_reporting(E_ALL | E_STRICT);
-        
-        $this->db = $db;
+        error_reporting(E_ALL | E_STRICT);        
     }
     
     public function select($columns = '*') 
@@ -59,7 +57,8 @@ class QueryBuilder
     
     public function where($condition) 
     {
-        $this->sql .= ' WHERE ' . $this->buildCondition($condition);
+        $this->condition = $condition;        
+        $this->sql .= ' WHERE ' . $this->buildCondition($this->condition);
         
         return $this;
     }
@@ -148,16 +147,6 @@ class QueryBuilder
         return $this->sql;
     }
     
-    public function one() {
-        $result = $this->db->conn->query($this->sql);
-        return $result->fetch(\PDO::FETCH_ASSOC);
-    }
-    
-    public function all() {
-        $result = $this->db->conn->query($this->sql);
-        return $result->fetchAll(\PDO::FETCH_ASSOC);
-    }
-    
     private function buildCondition($condition) 
     {
         $where = '';
@@ -192,6 +181,11 @@ class QueryBuilder
     public function quoteColumnName($column) 
     {
         return $this->quoteBacktick($column);
+    }
+    
+    public function getCondition() 
+    {
+        return $this->condition;
     }
     
     private function quoteBacktick($value) 
