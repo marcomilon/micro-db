@@ -71,7 +71,7 @@ abstract class ActiveRecord
         $condition = $this->queryBuilder->getCondition();
         
         if(empty($condition)) {
-            throw new \Exception("Cannot delete data without condition.");
+            throw new \Exception("Cannot delete model without condition.");
         }
         
         $model = self::factory();

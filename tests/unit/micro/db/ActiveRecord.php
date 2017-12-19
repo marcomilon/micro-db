@@ -25,6 +25,17 @@ class HelpCategory extends atoum
         $this->array($model)->hasSize(3);
     }
     
+    public function testFindAllForEach() {
+        $expectedResult = ['2' => 'Polygon properties', '3' => 'Numeric Functions', '4' => 'WKT'];
+        $condition = [
+            ['in', 'help_category_id', ['2', '3', '4']]
+        ];
+        $models = \micro\Model\HelpCategory::find()->where($condition)->all();
+        foreach($models as $model) {
+            $this->string($model->name)->isEqualTo($expectedResult[$model->help_category_id]);  
+        }
+    }
+    
     public function testSave() {
         $model = new \micro\Model\HelpCategory();
         $model->help_category_id = '41';
@@ -86,7 +97,7 @@ class HelpCategory extends atoum
             function() use($model) {
                 $model->delete();
             }
-        )->hasMessage('Cannot delete data without condition.');
+        )->hasMessage('Cannot delete model without condition.');
     }
     
     private function getConnection() {
