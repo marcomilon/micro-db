@@ -6,13 +6,13 @@ Micro-db is a simpre ORM library. It has 3 files:
 2. Connection.php
 3. QueryBuilder.php
 
-## Installing via Composer 
+## How to install
 
-## Installing Composer
+### Installing Composer
 
 First you need to install Composer. You may do so by following the instructions at [getcomposer.org](https://getcomposer.org/download/).
 
-## How to use the ActiveRecord
+### How to use the ActiveRecord
 
 First create an active record class. You need to implement two methods: tableName and dbConnection.
 
@@ -45,9 +45,9 @@ $book->title('This is the title of my book');
 $book->save();
 ```
 
-## How to use the QueryBuilder
+### How to use the QueryBuilder
 
-The queryBuilder build sql query to be sent to the database. For example:
+The queryBuilder builds a sql query to be sent to the database. For example:
 
 ```php
 $table = 'home';
