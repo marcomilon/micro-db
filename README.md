@@ -1,29 +1,39 @@
 # Micro-db 
 
-Micro-db is a simpre ORM library. It has 3 files:
+Micro-db is a lightweight ORM library. 
 
-1. ActiveRecord.php
-2. Connection.php
-3. QueryBuilder.php
+### Installation
 
-## How to install
+First you need to install Composer. You may do so by following the instructions at [getcomposer.org](https://getcomposer.org/download/). With composer installed run
 
-### Installing Composer
+`composer require fullstackpe/micro-db`
 
-First you need to install Composer. You may do so by following the instructions at [getcomposer.org](https://getcomposer.org/download/).
+If you prefer you can create a composer.json 
 
-### How to use the ActiveRecord
+```json
+{
+    "require": {
+        "fullstackpe/micro-db": "^1.0"
+    }
+}
+```
 
-First create an active record class. You need to implement two methods: tableName and dbConnection.
+Then run the command `composer install`
+
+### The ActiveRecord Class
+
+If you have a table called `book`. You need to create an active record Class called `Book` that extends the Class `micro\db\ActiveRecord`. The class `Book` needs to implement two methods: tableName() and dbConnection().
+
+#### Example
 
 ```php
 use micro\db\ActiveRecord;
 
-class Books extends ActiveRecord {
+class Book extends ActiveRecord {
     
     public static function tableName() 
     {
-        return 'books';
+        return 'book';
     }
     
     public static function dbConnection() 
@@ -37,17 +47,36 @@ class Books extends ActiveRecord {
     }
 }
 ```
+
 Then you can instantiate the class.
 
+#### Example
+
 ```php
-$book = new Books();
+// Create a new book
+$book = new Book();
 $book->title('This is the title of my book');
 $book->save();
+
+// fetchs all books
+$books = Book::find()->all();
+foreach($books as $book) {
+    echo $book->title;
+}
+
+// search for one book
+$condition = [
+    ['=', 'id', '1']
+];
+$book = Book::find()->where($condition)->one();
+echo $book->title
 ```
 
-### How to use the QueryBuilder
+### The QueryBuilder Class
 
-The queryBuilder builds a sql query to be sent to the database. For example:
+The queryBuilder class builds a Sql statement. 
+
+#### Example
 
 ```php
 $table = 'home';
@@ -60,8 +89,12 @@ $columns = [
 $sql = $qB->select($columns)->from($table)->getRawSql();
 ```
 
-The variable $sql is equal to "SELECT `id`, `name`, `address` FROM `home`
+The variable `$sql` is equal to the string "SELECT `id`, `name`, `address` FROM `home`".
 
-#### Credits
+### Contribution
 
-Made in Perú. Thanks to [fullstack.pe](https://www.fullstack.pe/)
+Feel free to contribute! Just create a new issue or a new pull request.
+
+### License
+
+This library is released under the MIT License.
