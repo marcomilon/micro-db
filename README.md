@@ -8,7 +8,7 @@ First you need to install Composer. You may do so by following the instructions 
 
 `composer require fullstackpe/micro-db`
 
-If you prefer you can create a composer.json 
+If you prefer you can create a composer.json in your project folder.
 
 ```json
 {
@@ -90,6 +90,10 @@ $sql = $qB->select($columns)->from($table)->getRawSql();
 ```
 
 The variable `$sql` is equal to the string "SELECT `id`, `name`, `address` FROM `home`".
+
+### Note
+
+This library is part of the [micro php framework](https://github.com/marcomilon/micro).
 
 ### Contribution
 
