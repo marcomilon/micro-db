@@ -1,12 +1,19 @@
 <?php
+/**
+ * Licensed under the MIT license.
+ *
+ * For the full copyright and license information, please view the LICENSE file.
+ *
+ * @author Marco Milon <marco.milon@gmail.com>
+ * @link https://github.com/marcomilon/micro-db
+ */
 
 namespace micro\db;
 
 class QueryBuilder
 {
-  
-    private $sql;
-    private $condition;
+    
+    private $condition = [];
     
     private $logicalOperators = [
         'AND',
@@ -56,9 +63,9 @@ class QueryBuilder
     }
     
     public function where($condition) 
-    {
-        $this->condition = $condition;        
-        $this->sql .= ' WHERE ' . $this->buildCondition($this->condition);
+    {       
+        $this->condition = $condition;
+        $this->sql .= ' WHERE ' . $this->buildCondition($condition);
         
         return $this;
     }
