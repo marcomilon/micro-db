@@ -4,9 +4,11 @@ Micro-db is a lightweight ORM library.
 
 ### Installation
 
-First you need to install Composer. You may do so by following the instructions at [getcomposer.org](https://getcomposer.org/download/). With composer installed run
+First you need to install Composer. You may do so by following the instructions 
+at [getcomposer.org](https://getcomposer.org/download/). 
+Then run
 
-`composer require fullstackpe/micro-db`
+> composer require fullstackpe/micro-db
 
 If you prefer you can create a composer.json in your project folder.
 
@@ -18,11 +20,15 @@ If you prefer you can create a composer.json in your project folder.
 }
 ```
 
-Then run the command `composer install`
+Then run the command 
+
+> composer install
 
 ### The ActiveRecord Class
 
-If you have a table called `book`. You need to create an active record Class called `Book` that extends the Class `micro\db\ActiveRecord`. The class `Book` needs to implement two methods: tableName() and dbConnection().
+If you have a table called `book`. You need to create an active record Class 
+called `Book` that extends the Class `micro\db\ActiveRecord`. The class `Book` 
+needs to implement two methods: tableName() and dbConnection().
 
 #### Example
 
