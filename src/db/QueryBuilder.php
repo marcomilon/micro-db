@@ -107,7 +107,7 @@ class QueryBuilder
     *
     * @return object $this
     */
-    public function where($condition, $parameters = []) 
+    public function where($condition) 
     {       
         $this->condition = $condition;
         $this->sql .= ' WHERE ' . $this->buildCondition($condition);
