@@ -31,6 +31,8 @@ class QueryBuilder
     */
     private $condition = [];
     
+    private $parameters = [];
+    
     /**
     * @var array of valid logic operators
     */
@@ -105,10 +107,14 @@ class QueryBuilder
     *
     * @return object $this
     */
-    public function where($condition) 
+    public function where($condition, $parameters = []) 
     {       
         $this->condition = $condition;
         $this->sql .= ' WHERE ' . $this->buildCondition($condition);
+        
+        if(is_array($parameters)) {
+            $this->parameters = $parameters;
+        }
         
         return $this;
     }
@@ -246,6 +252,11 @@ class QueryBuilder
     public function getRawSql() 
     {
         return $this->sql;
+    }
+    
+    public function getParameters() 
+    {
+        return $this->parameters;
     }
     
     /**
