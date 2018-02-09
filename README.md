@@ -15,7 +15,7 @@ If you prefer you can create a composer.json in your project folder.
 ```json
 {
     "require": {
-        "fullstackpe/micro-db": "^1.0"
+        "fullstackpe/micro-db": "^1.1"
     }
 }
 ```

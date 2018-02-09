@@ -321,25 +321,4 @@ class QueryBuilder extends atoum
         )->hasMessage('Comparison operator =! is not supported.');
     }
     
-    public function testSelectWithParameterized() {
-        $table = 'home';
-        $qB = new \micro\db\QueryBuilder();
-        $columns = [
-            'id',
-            'name',
-            'address'
-        ];
-        $condition = [
-            ['=', 'id', ':id'],
-        ];
-        $params = [
-            'id' => 10
-        ];        
-        $qB = $qB->select($columns)->from($table)->where($condition, $params);
-        
-        $sql = $qB->getRawSql();
-        $this->string($sql)->isEqualTo("SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = ':id'");
-        $this->array($qB->getParameters())->integer['id']->isEqualTo(10);
-    }
-    
 }

@@ -112,10 +112,6 @@ class QueryBuilder
         $this->condition = $condition;
         $this->sql .= ' WHERE ' . $this->buildCondition($condition);
         
-        if(is_array($parameters)) {
-            $this->parameters = $parameters;
-        }
-        
         return $this;
     }
     

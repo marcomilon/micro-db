@@ -58,14 +58,14 @@ class HelpCategory extends atoum
         $model->parent_category_id = '36';
         $model->url = '';
         $model->save();
-        
+    
         $condition = [
             ['=', 'help_category_id', '42']
         ];
         $model = \micro\Model\HelpCategory::find()->where($condition);
         $model->name = "Test new category Updated";
         $model->save();
-        
+    
         $this->string($model->name)->isEqualTo("Test new category Updated");
         $this->string($model->parent_category_id)->isEqualTo("36");
         $this->string($model->help_category_id)->isEqualTo("42");
@@ -91,7 +91,7 @@ class HelpCategory extends atoum
     
     public function testDeleteNoCondition() {    
         $model = \micro\Model\HelpCategory::find();
-        
+    
         $qB = new \micro\db\QueryBuilder();
         $this->exception(
             function() use($model) {
@@ -99,16 +99,7 @@ class HelpCategory extends atoum
             }
         )->hasMessage('Cannot delete model without condition.');
     }
-    
-    private function getConnection() {
-        $servername = "127.0.0.1";
-        $username = "root";
-        $password = "fullstack";
-        $database = "mysql";
         
-        return new \micro\db\Connection($servername, $username, $password, $database);
-    }
-    
     public function tearDown()
     {
         $condition = [
@@ -116,7 +107,7 @@ class HelpCategory extends atoum
         ];
         $model = \micro\Model\HelpCategory::find()->where($condition);
         $model->delete();
-        
+    
         $condition = [
             ['=', 'help_category_id', '42']
         ];

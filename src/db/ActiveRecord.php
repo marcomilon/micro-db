@@ -9,8 +9,14 @@ abstract class ActiveRecord
     
     protected $db;
     private $columns = [];
+    
+    private $condition = [];
+    private $parameters = [];
+    
     private $queryBuilder;
     private static $isUpdate = false;
+    
+    private $model;
     
     abstract public static function tableName();
     abstract public static function dbConnection();
@@ -25,11 +31,8 @@ abstract class ActiveRecord
         if(isset($this->columns[$name])) {
             return $this->columns[$name];
         } else {
-            $model = self::factory();
-            $condition = $this->queryBuilder->getCondition();
-            $rawSql = $model->queryBuilder->select()->from(static::tableName())->where($condition)->getRawSql();
-            $result = $model->one();
-            
+            $this->queryBuilder->select()->from(static::tableName())->where($this->condition);
+            $result = $this->one();
             foreach($result as $k => $v) {
                 $this->columns[$k] = $v;
             }
@@ -48,22 +51,50 @@ abstract class ActiveRecord
     
     public function where($condition) 
     {
-        $this->queryBuilder->where($condition);
+        foreach($condition as $filter) {
+            switch(count($filter)) {
+                case 3:
+                $this->setParametersValue($filter[1], $filter[2]);
+                $this->condition[] = [$filter[0], $filter[1], $this->getParamaterName($filter[1], $filter[2])];
+                break;
+                default:
+                $this->condition[] = $filter;
+            }
+        }
+        
+        $this->queryBuilder->where($this->condition);
+        
         return $this;
     }
     
     public function save() 
-    {
-        $model = self::factory();
-        
-        $rawSql = $model->queryBuilder->insert(static::tableName(), $this->columns)->getRawSql();
+    {        
         
         if(self::$isUpdate) {
-            $condition = $this->queryBuilder->getCondition();
-            $rawSql = $model->queryBuilder->update(static::tableName(), $this->columns)->where($condition)->getRawSql();
+            
+            $this->update();
+            
+        } else {
+            
+            $model = self::factory();
+            $columnsToInsert = [];
+            
+            foreach($this->columns as $key => $value) {
+                $model->setParametersValue($key, $value, false);
+                $columnsToInsert[$key] = ':i_'.$key;
+            }
+            
+            $rawSql = $model->queryBuilder->insert(static::tableName(), $columnsToInsert)->getRawSql();        
+            $sql = str_replace('\'', '', $rawSql);
+            $stmt = $model->db->conn->prepare($sql);
+            foreach($model->parameters as $key => &$value) {
+                $stmt->bindParam($key, $value);
+            }
+            
+            $stmt->execute(); 
+            $model->parameters = $model->cleanInputParameters($model->parameters);
         }
         
-        $model->exec();        
     }
     
     public function delete() 
@@ -74,21 +105,36 @@ abstract class ActiveRecord
             throw new \Exception("Cannot delete model without condition.");
         }
         
-        $model = self::factory();
-        $rawSql = $model->queryBuilder->delete(static::tableName())->where($condition)->getRawSql();
-        $model->exec($rawSql);
+        $rawSql = $this->queryBuilder->delete(static::tableName())->where($condition)->getRawSql();
+        $sql = str_replace('\'', '', $rawSql);
+        $stmt = $this->db->conn->prepare($sql);
+        foreach($this->parameters as $key => &$value) {
+            $stmt->bindParam($key, $value);
+        }
+        $stmt->execute();
     }
     
     public function one() 
     {
-        $result = $this->db->conn->query($this->queryBuilder->getRawSql());
-        return $result->fetch(\PDO::FETCH_OBJ);
+        $sql = str_replace('\'', '', $this->queryBuilder->getRawSql());
+        $stmt = $this->db->conn->prepare($sql);
+        foreach($this->parameters as $key => &$value) {
+            $stmt->bindParam($key, $value);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_OBJ);
     }
     
     public function all() 
     {
-        $result = $this->db->conn->query($this->queryBuilder->getRawSql());
-        return $result->fetchAll(\PDO::FETCH_OBJ);
+        $sql = str_replace('\'', '', $this->queryBuilder->getRawSql());
+        $stmt = $this->db->conn->prepare($sql);
+        foreach($this->parameters as $key => &$value) {
+            $stmt->bindParam($key, $value);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_OBJ);
     }
     
     public function exec() 
@@ -104,6 +150,73 @@ abstract class ActiveRecord
         $model->queryBuilder = new QueryBuilder();
         
         return $model;
+    }
+    
+    private function setParametersValue($key, $value, $isCondition = true) {
+        $result = "";
+        
+        if(is_array($value)) {
+            for($i=0;$i<count($value);$i++) {
+                $parameterName = $isCondition ? ':c_'.$key.'_'.$i : ':i_'.$key.'_'.$i;
+                $this->parameters[$parameterName] = $value[$i];
+            }
+        } else {
+            $parameterName = $isCondition ? ':c_'.$key : ':i_'.$key;
+            $this->parameters[$parameterName] = $value; 
+        }
+    }
+    
+    private function getParamaterName($key, $value, $isCondition = true) {
+        
+        $result = "";
+        
+        if(is_array($value)) {
+            $result = '(';
+            
+            for($i=0;$i<count($value);$i++) {
+                $parameterName = $isCondition ? ':c_'.$key.'_'.$i : ':i_'.$key.'_'.$i;
+                $result .= $parameterName . ', ';
+            }
+            
+            $result = trim($result, ', ') . ')';
+        } else {
+            $parameterName = $isCondition ? ':c_'.$key : ':i_'.$key;
+            $result = $parameterName;
+        }        
+        
+        return $result;
+    }
+    
+    private function update() 
+    {
+        $columnsToInsert = [];
+        
+        foreach($this->columns as $key => $value) {
+            $this->setParametersValue($key, $value, false);
+            $columnsToInsert[$key] = ':i_'.$key;
+        }
+        
+        $rawSql = $this->queryBuilder->update(static::tableName(), $columnsToInsert)->where($this->condition)->getRawSql();
+        
+        $sql = str_replace('\'', '', $rawSql);
+        $stmt = $this->db->conn->prepare($sql);
+        foreach($this->parameters as $key => &$value) {
+            $stmt->bindParam($key, $value);
+        }
+        
+        $stmt->execute(); 
+        
+        $this->parameters = $this->cleanInputParameters($this->parameters);
+    }
+    
+    private function cleanInputParameters($parameters) {
+        $result = [];
+        foreach($parameters as $key => $value) {
+            if(strpos($key, ':i_') === false) {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
     }
     
 }
