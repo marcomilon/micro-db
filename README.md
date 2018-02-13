@@ -1,5 +1,7 @@
 # Micro-db 
 
+[![Latest Stable Version](https://poser.pugx.org/fullstackpe/micro-db/v/stable)](https://packagist.org/packages/fullstackpe/micro-db) [![Build Status](https://travis-ci.org/marcomilon/micro-db.svg?branch=master)](https://travis-ci.org/marcomilon/micro-db)
+
 Micro-db is a lightweight ORM library. 
 
 ### Installation
