@@ -15,7 +15,7 @@ class HelpCategory extends ActiveRecord {
     {
         $servername = "127.0.0.1";
         $username = "root";
-        $password = "fullstack";
+        $password = "";
         $database = "mysql";
         
         return new \micro\db\Connection($servername, $username, $password, $database);

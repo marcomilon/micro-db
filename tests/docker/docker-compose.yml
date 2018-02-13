@@ -4,7 +4,7 @@ services:
     image: mysql
     container_name: micro-db-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: fullstack
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     ports:
      - 3306:3306
     restart: "no"
