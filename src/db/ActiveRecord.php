@@ -30,7 +30,7 @@ abstract class ActiveRecord
     {
         if(isset($this->columns[$name])) {
             return $this->columns[$name];
-        } else {
+        } elseif(isset($this->queryBuilder)) {
             $this->queryBuilder->select()->from(static::tableName())->where($this->condition);
             $result = $this->one();
             foreach($result as $k => $v) {

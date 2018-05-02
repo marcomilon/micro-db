@@ -6,6 +6,8 @@ use micro\db\ActiveRecord;
 
 class HelpCategory extends ActiveRecord {
     
+    public $customTitle = "The custom title";
+    
     public static function tableName() 
     {
         return 'help_category';

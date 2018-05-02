@@ -99,6 +99,11 @@ class HelpCategory extends atoum
             }
         )->hasMessage('Cannot delete model without condition.');
     }
+    
+    public function testCustomTitle() {
+        $model = new \micro\Model\HelpCategory();
+        $this->string($model->customTitle)->isEqualTo("The custom title");
+    }
         
     public function tearDown()
     {
