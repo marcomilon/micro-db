@@ -15,10 +15,14 @@ class QueryBuilder
     /**
     * @var array the conditions to be applied in the query
     *
-    * A condition is an array used to build the where statement. *Elements of 
-    * the array will form the where condition. If an element of the array 
-    * has only one item  is consider a logicalOperatos. If and element of 
-    * the array has more than one element it consider a comparison Operator.
+    * A condition is an array used to build the where statement. Elements of 
+    * the array will form the where condition. 
+    *
+    * If the element has only one item  is consider a logicalOperatos. 
+    * For example: AND, OR
+    *
+    * If the element has more than one element it consider a comparison Operator.
+    * For example: =, !=, <, >, <=, >=
     *
     * For example
     *
