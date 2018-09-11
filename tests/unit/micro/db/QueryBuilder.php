@@ -141,17 +141,17 @@ class QueryBuilder extends atoum
             ['and'],
             ['!=', 'status', '0']
         ];
-        
+    
         $group = [
             'id',
             'name',
             'address'
         ];
-        
+    
         $orderBy = [
             ['id', 'ASC']
         ]; 
-        
+    
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -171,24 +171,24 @@ class QueryBuilder extends atoum
             'name',
             'address'
         ];
-        
+    
         $condition = [
             ['=', 'id', '1'],
             ['and'],
             ['!=', 'status', '0']
         ];
-        
+    
         $group = [
             'id',
             'name',
             'address'
         ];
-        
+    
         $orderBy = [
             ['id', 'ASC'],
             ['status', 'DESC']
         ]; 
-        
+    
         $table = 'home';
         $qB = new \micro\db\QueryBuilder();
         $sql = $qB->select($columns)
@@ -200,19 +200,6 @@ class QueryBuilder extends atoum
         ->getRawSql();
         $expectedSql = "SELECT `id`, `name`, `address` FROM `$table` WHERE `id` = '1' AND `status` != '0' GROUP BY `id`, `name`, `address` ORDER BY `id` ASC, `status` DESC LIMIT 10, 100";
         $this->string($sql)->isEqualTo($expectedSql);        
-    }
-    
-    
-    public function testSelectEscapeValues() {
-        $table = 'home';
-        $qB = new \micro\db\QueryBuilder();
-        $condition = [
-            ['=', 'id', "Bobby';DROP TABLE users; -- "],
-            ['and'],
-            ['=', 'status', '" or ""="']
-        ];
-        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
-        $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- ' AND `status` = '\\\" or \\\"\\\"=\\\"'");
     }
     
     public function testSelectBetween() {
@@ -319,6 +306,67 @@ class QueryBuilder extends atoum
                 $qB->select()->from($table)->where($condition)->getRawSql();
             }
         )->hasMessage('Comparison operator =! is not supported.');
+    }
+    
+    public function testSelectJoin() {        
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->select()->from('login')->join('profile', ['=', 'id', 'login_id'])->getRawSql();
+        
+        $this->string($sql)->isEqualTo("SELECT * FROM `login` JOIN `profile` ON `login`.`id` = `profile`.`login_id`");
+    }
+    
+    public function testSelectJoinWithWhere() {        
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['=', 'id', '1'],
+            ['and'],
+            ['!=', 'status', '0']
+        ];
+        $sql = $qB->select()->from('login')->join('profile', ['=', 'id', 'login_id'])->where($condition)->getRawSql();
+        
+        $this->string($sql)->isEqualTo("SELECT * FROM `login` JOIN `profile` ON `login`.`id` = `profile`.`login_id` WHERE `id` = '1' AND `status` != '0'");
+    }
+    
+    public function testSelectWithJoinLimit() {
+        $qB = new \micro\db\QueryBuilder();
+        $sql = $qB->select()->from('help_category')->join('help_keyword', ['=', 'help_category_id', 'help_keyword_id'])->limit(1)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `help_category` JOIN `help_keyword` ON `help_category`.`help_category_id` = `help_keyword`.`help_keyword_id` LIMIT 1");
+    }
+    
+    public function testSelectWithAlias() {
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['=', 'help_category.help_category_id', '1']
+        ];
+        $sql = $qB->select(["help_category.name"])->from('help_category')->join('help_keyword', ['=', 'help_category_id', 'help_keyword_id'])->where($condition)->limit(1)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT `help_category`.`name` FROM `help_category` JOIN `help_keyword` ON `help_category`.`help_category_id` = `help_keyword`.`help_keyword_id` WHERE `help_category`.`help_category_id` = '1' LIMIT 1");
+    }
+    
+    public function testSelectWithInvalidAlias() {
+        $qB = new \micro\db\QueryBuilder();
+        $this->exception(
+            function() use($qB) {
+                $table = 'home';
+                $condition = [
+                    ['=!', 'id', '1'],
+                    ['ands'],
+                    ['=', 'status', '0']
+                ];
+                $qB->select(["test.test.test"])->from($table)->where($condition)->getRawSql();
+            }
+        )->hasMessage('Columns name test.test.test is not valid.');
+    }
+    
+    public function testSelectEscapeValues() {
+        $table = 'home';
+        $qB = new \micro\db\QueryBuilder();
+        $condition = [
+            ['=', 'id', "Bobby';DROP TABLE users; -- "],
+            ['and'],
+            ['=', 'status', '" or ""="']
+        ];
+        $sql = $qB->select()->from($table)->where($condition)->getRawSql();
+        $this->string($sql)->isEqualTo("SELECT * FROM `home` WHERE `id` = 'Bobby\';DROP TABLE users; -- ' AND `status` = '\\\" or \\\"\\\"=\\\"'");
     }
     
 }

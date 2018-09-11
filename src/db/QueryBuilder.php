@@ -60,6 +60,10 @@ class QueryBuilder
         'IN'
     ];
     
+    private $fromTable;
+    
+    private $joinTable;
+    
     public function __construct()
     {    
         set_error_handler([$this, 'handleError']);
@@ -99,6 +103,7 @@ class QueryBuilder
     */
     public function from($table) 
     {    
+        $this->fromTable = $table;
         $this->sql .= 'FROM ' . $this->quoteTableName($table);
         
         return $this;
@@ -180,6 +185,28 @@ class QueryBuilder
         if(is_numeric($to)) {
             $this->sql .= ', ' . $to;
         }
+        
+        return $this;
+    }
+    
+    public function join($joinTable, $on) 
+    {
+        $joinCondition = $on[0];
+        $joinColumn1   = $on[1];
+        $joinColumn2   = $on[2];
+        
+        if(strpos($joinColumn1, '.') === false) {
+            $joinColumn1 = $this->fromTable .'.'. $joinColumn1;
+        }
+        
+        if(strpos($joinColumn2, '.') === false) {
+            $joinColumn2 = $joinTable .'.'. $joinColumn2;
+        }
+        
+        $this->sql .= ' JOIN ' . $this->quoteTableName($joinTable) . 
+        ' ON ' . $this->quoteColumnName($joinColumn1) .
+         ' ' . $this->validateComparisonOperators($joinCondition) . ' ' .
+         $this->quoteColumnName($joinColumn2);
         
         return $this;
     }
@@ -321,7 +348,17 @@ class QueryBuilder
     */
     public function quoteColumnName($column) 
     {
-        return $this->quoteBacktick($column);
+        if(strpos($column, '.') === false) {
+            return $this->quoteBacktick($column);
+        } else {
+            $tokens = explode('.', $column);
+            $numberOfTokens = count($tokens);
+            if($numberOfTokens == 2) {
+                return $this->quoteBacktick($tokens[0]) .'.'. $this->quoteBacktick($tokens[1]);
+            } else {
+                throw new \Exception("Columns name $column is not valid.");
+            }
+        }
     }
     
     /**

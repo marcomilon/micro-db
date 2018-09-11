@@ -41,11 +41,11 @@ abstract class ActiveRecord
         }
     }
     
-    public static function find() 
+    public static function find($columns = null) 
     {
         $model = self::factory();
         self::$isUpdate = true;
-        $model->queryBuilder->select()->from(static::tableName());
+        $model->queryBuilder->select($columns)->from(static::tableName());
         return $model;
     }
     
@@ -64,6 +64,19 @@ abstract class ActiveRecord
         
         $this->queryBuilder->where($this->condition);
         
+        return $this;
+    }
+    
+    public function with($joinTable, $on) 
+    {
+        $this->queryBuilder->join($joinTable, $on);
+        
+        return $this;
+    }
+    
+    public function limit($from, $to = '') 
+    {
+        $this->queryBuilder->limit($from, $to);
         return $this;
     }
     
@@ -154,6 +167,7 @@ abstract class ActiveRecord
     
     private function setParametersValue($key, $value, $isCondition = true) {
         $result = "";
+        $key = str_replace('.', '_', $key);
         
         if(is_array($value)) {
             for($i=0;$i<count($value);$i++) {
@@ -169,6 +183,7 @@ abstract class ActiveRecord
     private function getParamaterName($key, $value, $isCondition = true) {
         
         $result = "";
+        $key = str_replace('.', '_', $key);
         
         if(is_array($value)) {
             $result = '(';
