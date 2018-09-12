@@ -99,10 +99,6 @@ $sql = $qB->select($columns)->from($table)->getRawSql();
 
 The variable `$sql` is equal to the string "SELECT `id`, `name`, `address` FROM `home`".
 
-### Note
-
-This library is part of the [micro php framework](https://github.com/marcomilon/micro).
-
 ### Contribution
 
 Feel free to contribute! Just create a new issue or a new pull request.
